@@ -21,7 +21,6 @@ class Relbytaxonomy extends \Statamic\Tags\Tags
 
         // Split the taxonomies parameter into an array
         $taxonomies = explode('|', $this->params->get('taxonomies'));
-
         
         // Split modifier scores parameter into an array
         $modifiers =  explode('|', $this->params->get('modifiers'));
@@ -32,8 +31,25 @@ class Relbytaxonomy extends \Statamic\Tags\Tags
         // Get the number of entries to return
         $entriesLimit = $this->params->get('limit');
 
-        // Get all entries in the current collection
-        $allEntries = Entry::query()->where('collection', $collection)->where('published', true)->get();
+        // Get defined collections
+        $definedCollections = $this->params->get('collections');
+
+        $allEntries = [];
+
+        if($definedCollections){
+            $collections = explode('|', $definedCollections);
+            $allEntries = Entry::query()
+                ->whereIn('collection', $collections)
+                ->where('published', true)
+                ->get();
+        }
+
+        else {
+            // Get all entries in the current collection
+            $allEntries = Entry::query()
+                ->where('collection', $collection)
+                ->where('published', true)->get();
+        }
 
         // Array to store related entries
         $relatedEntries = [];
